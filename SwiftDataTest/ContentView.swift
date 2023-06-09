@@ -1,25 +1,22 @@
-//
-//  ContentView.swift
-//  SwiftDataTest
-//
-//  Created by Graham Hall on 6/6/23.
-//
-
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var entries: [Entry]
     
     var body: some View {
         NavigationView {
             List {
-                ForEach(items) { item in
+                ForEach(entries) { entry in
                     NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+											EntryView(entry: entry)
                     } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+											VStack {
+												Text(entry.text)
+												Text(entry.timestamp, format: Date.FormatStyle(date: .numeric, time: .shortened))
+													.font(.caption)
+											}
                     }
                 }
                 .onDelete(perform: deleteItems)
@@ -40,7 +37,7 @@ struct ContentView: View {
 
     private func addItem() {
         withAnimation {
-            let newItem = Item(timestamp: Date())
+					let newItem = Entry(timestamp: Date(), text: "New Entry")
             modelContext.insert(newItem)
         }
     }
@@ -48,13 +45,8 @@ struct ContentView: View {
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(items[index])
+                modelContext.delete(entries[index])
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
